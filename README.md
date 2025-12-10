@@ -35,7 +35,7 @@ pip install -r requirements.txt
 python login.py
 ```
 
-##Tech Stack
+## Tech Stack
 ```bash
 Python 3.12+ (works on Windows; portable to macOS with setup)
 
