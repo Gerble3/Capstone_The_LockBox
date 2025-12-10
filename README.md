@@ -2,7 +2,7 @@
 
 # Cloud Vault Core Tools
 
-Backend scaffold for your Windows desktop password vault (no UI yet).
+Backend scaffold for your Windows desktop password vault.
 Includes:
 - **Argon2id** KDF (argon2-cffi) to derive a master key from password
 - **AES-GCM** for authenticated encryption (cryptography)
