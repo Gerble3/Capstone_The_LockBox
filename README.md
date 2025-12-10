@@ -25,10 +25,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 python login.py
 ```
-```
-
-```
-##Project Overview
+## Project Overview
 Desktop UI (PyQt6)
 
 - Master login screen to create or unlock a vault
