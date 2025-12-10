@@ -2,7 +2,7 @@
 A secure desktop password vault built in Python with a PyQt6 GUI.
 Lock Box stores credentials locally in an encrypted SQLite database and supports importing existing passwords from CSV exports.
 
-##Project Overview
+## Project Overview
 Lock Box is designed to be a simple, offline-first password manager:
 Users unlock a vault using a master password
 A vault encryption key is protected by the master password and used to encrypt/decrypt stored entries
