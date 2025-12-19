@@ -7,10 +7,12 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from main_window import VaultMainWindow
 from cloud_vault.db import open_vault, init_vault
 
+# (note for grader) login.py file contains the login window for the vault application
+
 APP_TITLE = "Lock Box — Master Login"
 
 
-# ---------- Threading helpers ----------
+#  Threading helpers 
 class WorkerSignals(QtCore.QObject):
     done = QtCore.pyqtSignal(object)
     error = QtCore.pyqtSignal(str)
@@ -35,7 +37,7 @@ class Worker(QtCore.QRunnable):
             self.signals.error.emit(str(e))
 
 
-# ---------- UI ----------
+#  UI 
 class LoginWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
@@ -126,7 +128,7 @@ class LoginWindow(QtWidgets.QWidget):
         else:
             self._set_db_path("vault.db")
 
-    # ---------- Helpers ----------
+    #  Helpers 
 
     def _return_to_login(self):
         # clear sensitive input when coming back
@@ -175,7 +177,7 @@ class LoginWindow(QtWidgets.QWidget):
         worker.signals.error.connect(_error, type=QtCore.Qt.ConnectionType.QueuedConnection)
         self.thread_pool.start(worker)
 
-    # ---------- Slots ----------
+    #  Slots
     def on_browse(self):
         current = self._get_db_path()
         if current:

@@ -1,3 +1,5 @@
+# This file contains functions to import CSV files into the vault database (acessed in main_window.py).
+
 # cloud_vault/importer.py
 from __future__ import annotations
 import csv, io, os

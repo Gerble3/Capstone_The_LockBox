@@ -6,7 +6,9 @@ from typing import Tuple
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from argon2.low_level import Type, hash_secret_raw
 
-# ---- KDF (Argon2id) ----
+# this file contains cryptographic functions and classes for the vault application
+
+#  KDF (Argon2id) 
 @dataclass
 class KDFParams:
     time_cost: int = 2       # iterations
@@ -35,7 +37,7 @@ def derive_master_key(password: str, salt: bytes, params: KDFParams) -> bytes:
         type=Type.ID
     )
 
-# ---- AEAD (AES-GCM) ----
+#  AEAD (AES-GCM) 
 def aead_encrypt(key: bytes, plaintext: bytes, aad: bytes | None = None) -> Tuple[bytes, bytes]:
     nonce = os.urandom(12)
     ct = AESGCM(key).encrypt(nonce, plaintext, aad)

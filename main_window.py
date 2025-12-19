@@ -1,4 +1,29 @@
 # main_window.py (PyQt6)
+
+# CSCI 490 Capstone Project 
+# By Reed Clayton
+
+# Info on Running the code available in README.md
+
+# Various Used Sources: (Too lazy to add more formal citations)
+# Cloud Vault project by Schimizu (modified)
+# https://python.plainenglish.io/i-built-a-local-password-vault-in-python-that-encrypts-and-stores-logins-securely-ff339dd46a01 
+# References for cryptography and password storage:
+# https://schimizu.com/understanding-salt-bcrypt-argon2id-ncrypt-and-pepper-essential-concepts-for-secure-password-df160ab062bf 
+# stackoverflow on argon2id usage in python
+# https://stackoverflow.com/questions/58431973/argon2-library-that-hashes-passwords-without-a-secret-and-with-a-random-salt-tha 
+# Cryptography docs for AES-GCM
+# https://pycryptodome.readthedocs.io/en/latest/src/introduction.html 
+# References for CSV import and parsing:
+# https://stackoverflow.com/questions/12042724/securely-storing-passwords-for-use-in-python-script 
+# References for PyQt6 UI elements and patterns:
+# https://www.geeksforgeeks.org/python/working-csv-files-python/ 
+# TutorialsPoint PyQt6 documentation
+# https://coderslegacy.com/creating-a-login-form-with-pyqt6/ 
+# PyQt6 official documentation
+# https://www.riverbankcomputing.com/static/Docs/PyQt6/ 
+
+
 from __future__ import annotations
 import sys, time, os, shutil
 from typing import Optional
@@ -12,7 +37,7 @@ from cloud_vault.db import (
     add_entry, update_entry, delete_entry, list_entries, get_entry, Vault
 )
 
-# ---------------- Table Model ----------------
+# Table Model for entries (I color coded in a Password column)
 class EntryTableModel(QtCore.QAbstractTableModel):
     # Add a Password column
     COLS = ["Title", "URL", "Username", "Password", "Host", "Updated"]
@@ -35,11 +60,13 @@ class EntryTableModel(QtCore.QAbstractTableModel):
     def columnCount(self, parent=QtCore.QModelIndex()) -> int:
         return 0 if parent.isValid() else len(self.COLS)
 
+
     def data(self, index: QtCore.QModelIndex, role=QtCore.Qt.ItemDataRole.DisplayRole):
         if not index.isValid() or not (0 <= index.row() < len(self._rows)):
             return None
         r = self._rows[index.row()]
         col = index.column()
+        # Provide data for display and editing 
         if role in (QtCore.Qt.ItemDataRole.DisplayRole, QtCore.Qt.ItemDataRole.EditRole):
             if col == 0: return r["title"]
             if col == 1: return r["url"]
@@ -63,14 +90,14 @@ class EntryTableModel(QtCore.QAbstractTableModel):
         return None
 
 
-# --------------- Add/Edit Dialog ---------------
+# Add/Edit Dialog (with password generator)
 class EntryDialog(QtWidgets.QDialog):
     def __init__(self, parent=None, title="Add Entry", data=None):
         super().__init__(parent)
         self.setWindowTitle(title)
         self.setModal(True)
 
-        # ---- Inputs ----
+        # Inputs 
         self.e_title = QtWidgets.QLineEdit()
         self.e_url = QtWidgets.QLineEdit()
         self.e_username = QtWidgets.QLineEdit()
@@ -80,7 +107,7 @@ class EntryDialog(QtWidgets.QDialog):
         self.e_notes = QtWidgets.QPlainTextEdit()
         self.e_notes.setMinimumHeight(80)
 
-        # ---- Password generator controls ----
+        # Password generator controls 
         self.spin_len = QtWidgets.QSpinBox()
         self.spin_len.setRange(8, 64)
         self.spin_len.setValue(16)
@@ -98,7 +125,7 @@ class EntryDialog(QtWidgets.QDialog):
             )
         )
 
-        # ---- Layout ----
+        # Layout 
         form = QtWidgets.QFormLayout()
         form.addRow("Title*", self.e_title)
         form.addRow("URL", self.e_url)
@@ -157,7 +184,7 @@ class EntryDialog(QtWidgets.QDialog):
         w.setLayout(layout)
         return w
 
-    # ------------- Generate password -------------
+    # Generate password 
     def _do_generate(self):
         length = int(self.spin_len.value())
         use_symbols = self.chk_symbols.isChecked()
@@ -197,7 +224,7 @@ class EntryDialog(QtWidgets.QDialog):
         self.e_password.selectAll()
         self.gen_status.setText(f"Generated {length}-char password.")
 
-    # ------------- Copy + auto-clear clipboard -------------
+    #  Copy/auto clear clipboard 
     def _copy_password(self):
         pwd = self.e_password.text()
         if not pwd:
@@ -214,7 +241,7 @@ class EntryDialog(QtWidgets.QDialog):
             cb.clear()
             self.gen_status.setText("Clipboard cleared.")
 
-    # ------------- Collect field values -------------
+    # Collect field values 
     def values(self):
         title = self.e_title.text().strip()
         if not title:
@@ -229,7 +256,7 @@ class EntryDialog(QtWidgets.QDialog):
         }
 
 
-# --------------- Import CSV Dialog ---------------
+# CSV Dialog 
 class ImportCsvDialog(QtWidgets.QDialog):
     def __init__(self, parent=None, csv_path: str = ""):
         super().__init__(parent)
@@ -326,7 +353,7 @@ class ImportCsvDialog(QtWidgets.QDialog):
         }
 
 
-# --------------- Main Window ---------------
+# Main Window 
 class VaultMainWindow(QtWidgets.QMainWindow):
     def __init__(self, vault: Vault, db_path: str, autoclipper_seconds: int = 15, on_lock=None):
         super().__init__()
@@ -345,7 +372,7 @@ class VaultMainWindow(QtWidgets.QMainWindow):
         self.proxy.setFilterKeyColumn(-1)  # search all columns
         self.proxy.setSourceModel(self.model)
 
-        # Table
+        # Table view
         self.table = QtWidgets.QTableView()
         self.table.setModel(self.proxy)
         self.table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
@@ -354,12 +381,12 @@ class VaultMainWindow(QtWidgets.QMainWindow):
         self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setStretchLastSection(True)
 
-        # Search
+        # Search box
         self.search = QtWidgets.QLineEdit()
         self.search.setPlaceholderText("Search title, url, username, host…")
         self.search.textChanged.connect(self.proxy.setFilterFixedString)
 
-        # Toolbar actions
+        # Toolbar actions 
         act_add = QtGui.QAction("Add", self)
         act_edit = QtGui.QAction("Edit", self)
         act_del = QtGui.QAction("Delete", self)
@@ -385,7 +412,7 @@ class VaultMainWindow(QtWidgets.QMainWindow):
         tb.addSeparator()
         tb.addAction(act_lock)
 
-        # Menu bar + File menu
+        # Menu bar/File menu
         file_menu = self.menuBar().addMenu("&File")
 
         act_import = file_menu.addAction("Import from CSV…")
@@ -408,7 +435,7 @@ class VaultMainWindow(QtWidgets.QMainWindow):
         act_add.setShortcut(QtGui.QKeySequence.StandardKey.New)
         act_copy.setShortcut(QtGui.QKeySequence("Ctrl+Shift+C"))
 
-    # ---- helpers ----
+    #  helpers 
     def lock_and_return(self):
         # Just close; closeEvent handles DB + callback
         self.close()
@@ -428,7 +455,7 @@ class VaultMainWindow(QtWidgets.QMainWindow):
         )
         return resp == QtWidgets.QMessageBox.StandardButton.Yes
 
-    # ---- Cloud Sync (file-based) ----
+    #  Cloud Sync (file-based) 
     def on_set_cloud_folder(self):
         folder = QtWidgets.QFileDialog.getExistingDirectory(
             self, "Select a sync folder (Dropbox/Google Drive/Syncthing/etc.)"
@@ -441,7 +468,7 @@ class VaultMainWindow(QtWidgets.QMainWindow):
 
         chosen = norm(folder)
 
-        # If the user already selected a folder named "LockBox", don't create LockBox/LockBox.
+        # If the user already selected a folder named "LockBox" don't create LockBox/LockBox
         base_name = os.path.basename(chosen.rstrip("\\/"))
         if base_name.lower() == "lockbox":
             lockbox_dir = chosen
@@ -490,7 +517,7 @@ class VaultMainWindow(QtWidgets.QMainWindow):
         )
         self.close()
 
-    # ---- CSV Import ----
+    #  CSV Import 
     def on_import_csv(self):
         dlg = ImportCsvDialog(self)
         if not dlg.exec():
@@ -525,7 +552,7 @@ class VaultMainWindow(QtWidgets.QMainWindow):
         )
         QtWidgets.QMessageBox.information(self, "Import complete", msg)
 
-    # ---- actions ----
+    # actions 
     def on_add(self):
         dlg = EntryDialog(self, "Add Entry")
         if dlg.exec():

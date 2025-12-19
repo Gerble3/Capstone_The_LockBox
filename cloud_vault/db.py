@@ -5,7 +5,9 @@ from dataclasses import dataclass
 from typing import Optional
 from .crypto import KDFParams, derive_master_key, aead_encrypt, aead_decrypt, normalize_host
 
-# ---- Schema ----
+# This file contains database functions for the vault application and uses SQLite for storage.
+
+#  Schema 
 SCHEMA_SQL = """
 PRAGMA journal_mode=DELETE;
 PRAGMA synchronous=FULL;
@@ -48,6 +50,7 @@ class Vault:
     vault_key: bytes  # 32 bytes
 
 
+
 def connect(db_path: str) -> sqlite3.Connection:
     # Allow using the same connection from a different thread (UI) after unlock/init
     conn = sqlite3.connect(db_path, check_same_thread=False)
@@ -63,8 +66,6 @@ def connect(db_path: str) -> sqlite3.Connection:
 
     conn.execute("PRAGMA foreign_keys=ON;")
     return conn
-
-
 
 
 def init_vault(db_path: str, master_password: str, params: Optional[KDFParams]=None) -> Vault:
@@ -101,7 +102,7 @@ def open_vault(db_path: str, master_password: str) -> Vault:
     return Vault(db_path, conn, vkey)
 
 
-# ---- CRUD ----
+#  CRUD 
 def add_entry(v: Vault, title: str, url: str, username: str, password: str, notes: str="") -> int:
     now = int(time.time())
     host = normalize_host(url or "")
