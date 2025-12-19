@@ -2,3 +2,4 @@ cryptography>=42.0.0
 argon2-cffi>=23.1.0
 pytest
 zipp>=3.19.1 
+PyQt6 >= 6.5.0
